@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Colisiones</title>
+    <style>
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="module">
+      import * as THREE from "./three.module.js";
+      import { OrbitControls } from "./OrbitControls.js";
+      import { GLTFLoader } from "./GLTFLoader.js";
+
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color("#566573");
+
+      const camera = new THREE.PerspectiveCamera(
+        45,
+        window.innerWidth / window.innerHeight
+      );
+      camera.position.set(0, 0, 10);
+
+      const hemisphereLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 1);
+      scene.add(hemisphereLight);
+
+      const cube1Geometry = new THREE.BoxGeometry(1, 1, 1);
+      const cube1Material = new THREE.MeshPhongMaterial({ color: "aqua" });
+      const cube1 = new THREE.Mesh(cube1Geometry, cube1Material);
+      cube1.position.set(3, 0, 0);
+      scene.add(cube1);
+
+      const cube1BB = new THREE.Box3();
+      cube1BB.setFromObject(cube1);
+
+      const cube2Geometry = new THREE.BoxGeometry(1, 1, 1);
+      const cube2Material = new THREE.MeshPhongMaterial({ color: "coral" });
+      const cube2 = new THREE.Mesh(cube2Geometry, cube2Material);
+      cube2.position.set(-3, 0, 0);
+      scene.add(cube2);
+
+      const cube2BB = new THREE.Box3();
+      cube2BB.setFromObject(cube2);
+      console.log(cube2BB);
+
+      const sphereGeometry = new THREE.SphereGeometry(1);
+      const sphereMaterial = new THREE.MeshPhongMaterial({ color: "teal" });
+      const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+      sphere.position.set(0, 0, 0);
+      scene.add(sphere);
+
+      const sphereBB = new THREE.Sphere(sphere.position, 1);
+
+      // const box = new THREE.BoxHelper(sphere, 0xffff00);
+      // scene.add(box);
+
+      const renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+      const cameraControl = new OrbitControls(camera, renderer.domElement);
+
+      document.onkeydown = function (e) {
+        // console.log(e);
+
+        // ArrowLeft
+        if (e.keyCode == 37) {
+          cube2.position.x = cube2.position.x - 1;
+        }
+
+        // ArrowRight
+        if (e.keyCode == 39) {
+          cube2.position.x = cube2.position.x + 1;
+        }
+      };
+
+      function checkCollitions() {
+        if (cube2BB.containsBox(cube1BB)) {
+          cube1.scale.y = 3;
+        } else {
+          cube1.scale.y = 1;
+        }
+
+        if (cube2BB.intersectsBox(cube1BB)) {
+          cube1.material.color = new THREE.Color("red");
+        } else {
+          cube1.material.color = new THREE.Color("aqua");
+        }
+
+        if (cube2BB.intersectsSphere(sphereBB)) {
+          sphere.material.wireframe = true;
+        } else {
+          sphere.material.wireframe = false;
+        }
+      }
+
+      function animate() {
+        cube2BB
+          .copy(cube2.geometry.boundingBox)
+          .applyMatrix4(cube2.matrixWorld);
+        requestAnimationFrame(animate);
+
+        checkCollitions();
+        renderer.render(scene, camera);
+      }
+
+      let mixer;
+    //Carga modelo GLB
+    const loaderGLTF = new GLTFLoader();
+    loaderGLTF.load(
+      "modelos/prueba.glb",
+      function (modelGLTF) {
+        const model = modelGLTF.scene;
+        model.scale.set(1.0, 1.0, 1.0);
+        model.position.set(1, 0.6, 3)
+        scene.add(model);
+        mixer = new THREE.AnimationMixer(model);
+        const clips = gltf.animations;
+      });
+
+    // const loaderGLTF = new GLTFLoader();
+    // loaderGLTF.load(
+    //   "modelos/buzz.glb",
+    //   function (modelGLTF) {
+    //     const buzz = modelGLTF.scene;
+    //     buzz.scale.set(1.0, 1.0, 1.0);
+    //     buzz.position.set(1, 0.6, 3)
+    //     scene.add(buzz);
+    //   });
+
+    //   const loaderGLTF1 = new GLTFLoader();
+    //     loaderGLTF1.load(
+    //       "modelos/ghost_squeak.glb",
+    //       function (modelGLTF) {
+    //         const buzz = modelGLTF.scene;
+    //         buzz.scale.set(1.0, 1.0, 1.0);
+    //         buzz.position.set(10, 0.6, 3)
+    //         scene.add(buzz);
+    //       });
+
+      // const loaderGLTF2 = new GLTFLoader();
+      //   loaderGLTF2.load(
+      //     "modelos/buzz.glb",
+      //     function (modelGLTF) {
+      //       const buzz = modelGLTF.scene;
+      //       buzz.scale.set(20.0, 20.0, 20.0);
+      //       buzz.position.set(1.5, 0.6, 3)
+      //       scene.add(buzz);
+      //     });
+
+      //   const loaderGLTF3 = new GLTFLoader();
+      //   loaderGLTF3.load(
+      //     "modelos/buzz.glb",
+      //     function (modelGLTF) {
+      //       const buzz = modelGLTF.scene;
+      //       buzz.scale.set(20.0, 20.0, 20.0);
+      //       buzz.position.set(1.5, 0.6, 3)
+      //       scene.add(buzz);
+      //     });
+
+      //   const loaderGLTF4 = new GLTFLoader();
+      //   loaderGLTF4.load(
+      //     "modelos/buzz.glb",
+      //     function (modelGLTF) {
+      //       const buzz = modelGLTF.scene;
+      //       buzz.scale.set(20.0, 20.0, 20.0);
+      //       buzz.position.set(1.5, 0.6, 3)
+      //       scene.add(buzz);
+      //     });
+
+      animate();
+    </script>
+  </body>
+</html>
