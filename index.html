@@ -16,6 +16,9 @@
       import { OrbitControls } from "./OrbitControls.js";
       import { GLTFLoader } from "./GLTFLoader.js";
 
+      const monkeyUrl = new URL('modelos/leon.glb', import.meta.url);
+      const monkeyUrl2 = new URL('modelos/buzz.glb', import.meta.url);
+
       const scene = new THREE.Scene();
       scene.background = new THREE.Color("#566573");
 
@@ -24,6 +27,13 @@
         window.innerWidth / window.innerHeight
       );
       camera.position.set(0, 0, 10);
+
+      let mixer;
+
+      // clips.forEach(function (clip) {
+      //     const action = mixer.clipAction(clip);
+      //     action.play();
+      //   });
 
       const hemisphereLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 1);
       scene.add(hemisphereLight);
@@ -97,6 +107,8 @@
         }
       }
 
+      const clock = new THREE.Clock();
+
       function animate() {
         cube2BB
           .copy(cube2.geometry.boundingBox)
@@ -104,22 +116,52 @@
         requestAnimationFrame(animate);
 
         checkCollitions();
+
+        if (mixer)
+          mixer.update(clock.getDelta());
         renderer.render(scene, camera);
       }
 
-      let mixer;
+      const assetLoader = new GLTFLoader();
     //Carga modelo GLB
-    const loaderGLTF = new GLTFLoader();
-    loaderGLTF.load(
-      "modelos/prueba.glb",
-      function (modelGLTF) {
-        const model = modelGLTF.scene;
-        model.scale.set(1.0, 1.0, 1.0);
-        model.position.set(1, 0.6, 3)
-        scene.add(model);
-        mixer = new THREE.AnimationMixer(model);
-        const clips = gltf.animations;
+    assetLoader.load(monkeyUrl.href, function(gltf) {
+      const model = gltf.scene;
+      scene.add(model);
+      mixer = new THREE.AnimationMixer(model);
+      const clips = gltf.animations;
+
+      clips.forEach(function(clip) {
+        const action = mixer.clipAction(clip);
+        action.play();
       });
+
+    });
+
+    assetLoader.load(monkeyUrl2.href, function(gltf) {
+      const model = gltf.scene;
+      model.scale.set(1.0, 1.0, 1.0);
+      model.position.set(10, 0.6, 3)
+      scene.add(model);
+      // mixer = new THREE.AnimationMixer(model);
+      // const clips = gltf.animations;
+
+      // clips.forEach(function(clip) {
+      //   const action = mixer.clipAction(clip);
+      //   action.play();
+      //});
+
+    });
+    // const loaderGLTF = new GLTFLoader();
+    // loaderGLTF.load(
+    //   "modelos/prueba.glb",
+    //   function (modelGLTF) {
+    //     const model = modelGLTF.scene;
+    //     model.scale.set(1.0, 1.0, 1.0);
+    //     model.position.set(1, 0.6, 3)
+    //     scene.add(model);
+    //     mixer = new THREE.AnimationMixer(model);
+    //     const clips = gltf.animations;
+    //   });
 
     // const loaderGLTF = new GLTFLoader();
     // loaderGLTF.load(
