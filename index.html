@@ -127,6 +127,17 @@
     assetLoader.load(monkeyUrl.href, function(gltf) {
       const model = gltf.scene;
       scene.add(model);
+      document.onkeydown = function (e) {
+      // ArrowLeft
+      if (e.keyCode == 37) {
+          model.position.x = model.position.x - 1;
+        }
+
+        // ArrowRight
+        if (e.keyCode == 39) {
+          model.position.x = model.position.x + 1;
+        }
+      }
       mixer = new THREE.AnimationMixer(model);
       const clips = gltf.animations;
 
@@ -142,6 +153,7 @@
       model.scale.set(1.0, 1.0, 1.0);
       model.position.set(10, 0.6, 3)
       scene.add(model);
+      
       // mixer = new THREE.AnimationMixer(model);
       // const clips = gltf.animations;
 
